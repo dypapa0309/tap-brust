@@ -4,39 +4,53 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>30초 광클 챌린지</title>
-  <meta name="description" content="터치해서 팡팡 터뜨리는 30초 광클 미니게임" />
+  <meta name="description" content="터치와 클릭으로 즐기는 30초 광클 미니게임" />
+
+  <!--
+    아래 ca-pub / slot 번호만 네 값으로 바꿔.
+    로컬(file://)에서는 광고가 안 뜨는 게 정상.
+  -->
+  <script async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXX"
+    crossorigin="anonymous"></script>
+
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="app">
     <header class="topbar card">
       <div>
-        <p class="eyebrow">터치해서 터뜨리는 미니게임</p>
+        <p class="eyebrow">터치해서 팡팡 터뜨리는 미니게임</p>
         <h1>30초 광클 챌린지</h1>
       </div>
-      <div class="best-wrap">
-        <span class="best-label">최고 기록</span>
+      <div class="best-box">
+        <span>최고 기록</span>
         <strong id="bestScore">0점</strong>
       </div>
     </header>
 
-    <section class="ad-slot ad-slot-top card">
-      <div class="ad-badge">광고 영역</div>
-      <div class="ad-copy">여기에 애드센스 배너를 넣으면 돼</div>
+    <section class="ad-wrap card">
+      <div class="ad-title">상단 광고 영역</div>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXX"
+           data-ad-slot="1111111111"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
     </section>
 
     <section class="stats">
       <div class="card stat">
-        <span class="stat-label">남은 시간</span>
-        <strong id="timeValue" class="stat-value">30s</strong>
+        <span class="label">남은 시간</span>
+        <strong id="timeValue">30s</strong>
       </div>
       <div class="card stat">
-        <span class="stat-label">점수</span>
-        <strong id="scoreValue" class="stat-value sky">0</strong>
+        <span class="label">점수</span>
+        <strong id="scoreValue" class="sky">0</strong>
       </div>
       <div class="card stat">
-        <span class="stat-label">콤보 배수</span>
-        <strong id="comboValue" class="stat-value amber">x1</strong>
+        <span class="label">콤보</span>
+        <strong id="comboValue" class="amber">x1</strong>
         <small id="comboSub">연속 0회</small>
       </div>
     </section>
@@ -47,37 +61,36 @@
       <div class="legend-item trap">💣 함정 -3</div>
     </section>
 
-    <main id="board" class="board card" aria-label="게임 보드">
-      <div class="board-glow"></div>
+    <main id="board" class="board card">
+      <div class="board-bg"></div>
 
-      <div id="readyOverlay" class="overlay overlay-visible">
+      <div id="readyOverlay" class="overlay show">
         <div class="panel">
-          <p class="eyebrow">터치해서 팡팡</p>
+          <p class="eyebrow">손가락 속도 테스트</p>
           <h2>30초 안에 얼마나 터뜨릴 수 있을까?</h2>
           <p class="desc">
-            랜덤으로 튀어나오는 타겟을 빠르게 눌러. 보너스는 챙기고, 함정은 피하고,
-            콤보를 이어서 점수를 폭주시켜.
+            귀여운 타겟이 계속 튀어나와. 빠르게 눌러서 점수를 올리고,
+            보너스는 챙기고, 폭탄은 조심해.
           </p>
 
           <div class="phase-row">
-            <div>초반은 적응</div>
-            <div>중반은 몰입</div>
-            <div>후반은 광기</div>
+            <div>초반 적응</div>
+            <div>중반 몰입</div>
+            <div>후반 광기</div>
           </div>
 
-          <button id="startBtn" class="btn btn-primary">시작하기</button>
+          <button id="startBtn" class="btn btn-primary" type="button">시작하기</button>
         </div>
       </div>
 
-      <div id="finalWarning" class="final-warning hidden">마지막 <span id="warningSeconds">5</span>초 · 손가락 풀가동</div>
+      <div id="warningBar" class="warning hidden">마지막 <span id="warningSec">5</span>초 · 손가락 풀가동</div>
 
-      <div id="targetsLayer" class="targets-layer"></div>
-      <div id="burstsLayer" class="bursts-layer"></div>
-      <div id="particlesLayer" class="particles-layer"></div>
+      <div id="targetsLayer" class="layer"></div>
+      <div id="effectsLayer" class="layer"></div>
 
       <div id="resultOverlay" class="overlay hidden">
         <div class="panel">
-          <p class="eyebrow trophy">🏆 결과</p>
+          <p class="eyebrow">🏆 결과</p>
           <p class="result-label">당신의 기록</p>
           <h2 id="resultScore" class="result-score">0점</h2>
           <p id="resultRank" class="result-rank">등급: 입문자</p>
@@ -85,29 +98,39 @@
 
           <div class="result-box">
             <p>최고 기록: <strong id="resultBest">0점</strong></p>
-            <p>콤보를 길게 이어가면 x2, x3 배수로 점수가 크게 오른다.</p>
+            <p>콤보 10회부터 x2, 18회부터 x3 배수.</p>
           </div>
 
           <div class="result-actions">
-            <button id="restartBtn" class="btn btn-primary">다시 도전</button>
-            <button id="shareBtn" class="btn btn-secondary">공유하기</button>
+            <button id="restartBtn" class="btn btn-primary" type="button">다시 도전</button>
+            <button id="shareBtn" class="btn btn-secondary" type="button">공유하기</button>
           </div>
 
-          <section class="ad-slot ad-slot-result">
-            <div class="ad-badge">광고 영역</div>
-            <div class="ad-copy">결과창 광고 슬롯</div>
+          <section class="ad-wrap result-ad">
+            <div class="ad-title">결과창 광고 영역</div>
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXX"
+                 data-ad-slot="2222222222"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
           </section>
         </div>
       </div>
     </main>
 
-    <section class="ad-slot ad-slot-bottom card">
-      <div class="ad-badge">광고 영역</div>
-      <div class="ad-copy">하단 배너 자리</div>
+    <section class="ad-wrap card bottom-ad">
+      <div class="ad-title">하단 광고 영역</div>
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXX"
+           data-ad-slot="3333333333"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
     </section>
 
-    <footer class="footer-note card">
-      모바일에서는 터치, PC에서는 클릭으로 플레이 가능.
+    <footer class="footer card">
+      모바일은 터치, PC는 클릭으로 플레이 가능.
     </footer>
   </div>
 

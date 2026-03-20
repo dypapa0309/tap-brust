@@ -1,62 +1,79 @@
 (() => {
+  'use strict';
+
   const GAME_TIME = 30;
   const TARGET_SIZE = 84;
-  const STORAGE_KEY = "tap-burst-best-html";
+  const STORAGE_KEY = 'tap-burst-best-fixed';
 
-  const el = {
-    bestScore: document.getElementById("bestScore"),
-    timeValue: document.getElementById("timeValue"),
-    scoreValue: document.getElementById("scoreValue"),
-    comboValue: document.getElementById("comboValue"),
-    comboSub: document.getElementById("comboSub"),
-    board: document.getElementById("board"),
-    readyOverlay: document.getElementById("readyOverlay"),
-    resultOverlay: document.getElementById("resultOverlay"),
-    startBtn: document.getElementById("startBtn"),
-    restartBtn: document.getElementById("restartBtn"),
-    shareBtn: document.getElementById("shareBtn"),
-    targetsLayer: document.getElementById("targetsLayer"),
-    burstsLayer: document.getElementById("burstsLayer"),
-    particlesLayer: document.getElementById("particlesLayer"),
-    finalWarning: document.getElementById("finalWarning"),
-    warningSeconds: document.getElementById("warningSeconds"),
-    resultScore: document.getElementById("resultScore"),
-    resultRank: document.getElementById("resultRank"),
-    resultComment: document.getElementById("resultComment"),
-    resultBest: document.getElementById("resultBest"),
+  const targetTypes = {
+    normal: { emoji: '🫧', label: '+1', points: 1, color: '#73d8ff' },
+    bonus: { emoji: '⭐', label: '+2', points: 2, color: '#ffd25b' },
+    trap: { emoji: '💣', label: '-3', points: -3, color: '#ff7592' },
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  const ui = {
+    board: $('board'),
+    targetsLayer: $('targetsLayer'),
+    effectsLayer: $('effectsLayer'),
+    readyOverlay: $('readyOverlay'),
+    resultOverlay: $('resultOverlay'),
+    startBtn: $('startBtn'),
+    restartBtn: $('restartBtn'),
+    shareBtn: $('shareBtn'),
+    bestScore: $('bestScore'),
+    timeValue: $('timeValue'),
+    scoreValue: $('scoreValue'),
+    comboValue: $('comboValue'),
+    comboSub: $('comboSub'),
+    warningBar: $('warningBar'),
+    warningSec: $('warningSec'),
+    resultScore: $('resultScore'),
+    resultRank: $('resultRank'),
+    resultComment: $('resultComment'),
+    resultBest: $('resultBest'),
   };
 
   const state = {
-    phase: "ready",
+    phase: 'ready',
     secondsLeft: GAME_TIME,
     score: 0,
     combo: 0,
-    multiplier: 1,
     bestScore: Number(localStorage.getItem(STORAGE_KEY) || 0),
     clockTimer: null,
     spawnTimer: null,
     targets: new Map(),
+    adsInitialized: false,
   };
 
-  const targetTypes = {
-    normal: { emoji: "🫧", label: "+1", points: 1, particle: "#7ad8ff" },
-    bonus: { emoji: "⭐", label: "+2", points: 2, particle: "#ffd25f" },
-    trap: { emoji: "💣", label: "-3", points: -3, particle: "#ff6e8e" },
-  };
+  function safeInitAds() {
+    if (state.adsInitialized) return;
+    const ins = document.querySelectorAll('.adsbygoogle');
+    if (!ins.length) return;
+    try {
+      ins.forEach(() => {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      });
+      state.adsInitialized = true;
+    } catch (err) {
+      console.warn('Ads init skipped:', err);
+    }
+  }
 
   function makeComment(score) {
-    if (score <= 10) return "이건… 연습이 조금 필요해 보여 😅";
-    if (score <= 40) return "손은 있는데 아직 폭주 단계는 아니야.";
-    if (score <= 70) return "오, 이 정도면 꽤 빠르다. 상위권 냄새 난다.";
-    return "이건 거의 인간이 아니다. 손가락에 엔진 달았네.";
+    if (score <= 10) return '이건… 연습이 조금 필요해 보여 😅';
+    if (score <= 40) return '손은 있는데 아직 폭주 단계는 아니야.';
+    if (score <= 70) return '오, 이 정도면 꽤 빠르다. 상위권 냄새 난다.';
+    return '이건 거의 인간이 아니다. 손가락에 엔진 달았네.';
   }
 
   function getRank(score) {
-    if (score <= 10) return "입문자";
-    if (score <= 25) return "예열 완료";
-    if (score <= 45) return "고속 손가락";
-    if (score <= 70) return "상위권";
-    return "괴물";
+    if (score <= 10) return '입문자';
+    if (score <= 25) return '예열 완료';
+    if (score <= 45) return '고속 손가락';
+    if (score <= 70) return '상위권';
+    return '괴물';
   }
 
   function pickTargetType(secondsLeft) {
@@ -64,18 +81,18 @@
     const roll = Math.random();
 
     if (elapsed < 10) {
-      if (roll < 0.78) return "normal";
-      if (roll < 0.94) return "bonus";
-      return "trap";
+      if (roll < 0.78) return 'normal';
+      if (roll < 0.94) return 'bonus';
+      return 'trap';
     }
     if (elapsed < 20) {
-      if (roll < 0.68) return "normal";
-      if (roll < 0.88) return "bonus";
-      return "trap";
+      if (roll < 0.68) return 'normal';
+      if (roll < 0.88) return 'bonus';
+      return 'trap';
     }
-    if (roll < 0.58) return "normal";
-    if (roll < 0.82) return "bonus";
-    return "trap";
+    if (roll < 0.58) return 'normal';
+    if (roll < 0.82) return 'bonus';
+    return 'trap';
   }
 
   function getSpawnInterval(secondsLeft) {
@@ -98,209 +115,218 @@
     return 1;
   }
 
-  function updateHud() {
-    state.multiplier = getMultiplier(state.combo);
-    el.bestScore.textContent = `${state.bestScore}점`;
-    el.timeValue.textContent = `${state.secondsLeft}s`;
-    el.scoreValue.textContent = `${state.score}`;
-    el.comboValue.textContent = `x${state.multiplier}`;
-    el.comboSub.textContent = `연속 ${state.combo}회`;
+  function updateHUD() {
+    const multiplier = getMultiplier(state.combo);
+    ui.bestScore.textContent = `${state.bestScore}점`;
+    ui.timeValue.textContent = `${state.secondsLeft}s`;
+    ui.scoreValue.textContent = String(state.score);
+    ui.comboValue.textContent = `x${multiplier}`;
+    ui.comboSub.textContent = `연속 ${state.combo}회`;
 
-    if (state.secondsLeft <= 5 && state.phase === "playing") {
-      el.finalWarning.classList.remove("hidden");
-      el.warningSeconds.textContent = state.secondsLeft;
-      el.board.classList.add("warning");
+    if (state.phase === 'playing' && state.secondsLeft <= 5) {
+      ui.warningBar.classList.remove('hidden');
+      ui.warningSec.textContent = String(state.secondsLeft);
+      ui.board.classList.add('danger');
     } else {
-      el.finalWarning.classList.add("hidden");
-      el.board.classList.remove("warning");
+      ui.warningBar.classList.add('hidden');
+      ui.board.classList.remove('danger');
     }
   }
 
-  function clearGameVisuals() {
-    el.targetsLayer.innerHTML = "";
-    el.burstsLayer.innerHTML = "";
-    el.particlesLayer.innerHTML = "";
-    state.targets.clear();
+  function clearTimers() {
+    if (state.clockTimer) {
+      clearInterval(state.clockTimer);
+      state.clockTimer = null;
+    }
+    if (state.spawnTimer) {
+      clearTimeout(state.spawnTimer);
+      state.spawnTimer = null;
+    }
   }
 
-  function resetGame() {
-    clearTimeout(state.spawnTimer);
-    clearInterval(state.clockTimer);
-    clearGameVisuals();
-    state.phase = "playing";
+  function clearVisuals() {
+    state.targets.forEach((target) => {
+      clearTimeout(target.expireTimer);
+      target.el.remove();
+    });
+    state.targets.clear();
+    ui.targetsLayer.innerHTML = '';
+    ui.effectsLayer.innerHTML = '';
+  }
+
+  function resetForPlay() {
+    clearTimers();
+    clearVisuals();
+    state.phase = 'playing';
     state.secondsLeft = GAME_TIME;
     state.score = 0;
     state.combo = 0;
-    updateHud();
-    el.readyOverlay.classList.remove("overlay-visible");
-    el.readyOverlay.classList.add("hidden");
-    el.resultOverlay.classList.add("hidden");
+    ui.readyOverlay.classList.remove('show');
+    ui.readyOverlay.classList.add('hidden');
+    ui.resultOverlay.classList.remove('show');
+    ui.resultOverlay.classList.add('hidden');
+    updateHUD();
   }
 
   function startGame() {
-    resetGame();
+    resetForPlay();
 
     state.clockTimer = setInterval(() => {
       state.secondsLeft -= 1;
       if (state.secondsLeft <= 0) {
         state.secondsLeft = 0;
-        updateHud();
+        updateHUD();
         endGame();
         return;
       }
-      updateHud();
+      updateHUD();
     }, 1000);
 
-    scheduleSpawn(100);
+    scheduleSpawn(120);
   }
 
   function endGame() {
-    clearInterval(state.clockTimer);
-    clearTimeout(state.spawnTimer);
-    state.phase = "result";
-
-    state.targets.forEach((value) => {
-      clearTimeout(value.expireTimer);
-    });
-    clearGameVisuals();
+    clearTimers();
+    state.phase = 'result';
+    clearVisuals();
 
     if (state.score > state.bestScore) {
       state.bestScore = state.score;
       localStorage.setItem(STORAGE_KEY, String(state.bestScore));
     }
 
-    updateHud();
+    ui.resultScore.textContent = `${state.score}점`;
+    ui.resultRank.textContent = `등급: ${getRank(state.score)}`;
+    ui.resultComment.textContent = makeComment(state.score);
+    ui.resultBest.textContent = `${state.bestScore}점`;
 
-    el.resultScore.textContent = `${state.score}점`;
-    el.resultRank.textContent = `등급: ${getRank(state.score)}`;
-    el.resultComment.textContent = makeComment(state.score);
-    el.resultBest.textContent = `${state.bestScore}점`;
-
-    el.resultOverlay.classList.remove("hidden");
-    el.resultOverlay.classList.add("overlay-visible");
+    ui.resultOverlay.classList.remove('hidden');
+    ui.resultOverlay.classList.add('show');
+    updateHUD();
   }
 
   function scheduleSpawn(delay) {
     clearTimeout(state.spawnTimer);
     state.spawnTimer = setTimeout(() => {
-      if (state.phase !== "playing") return;
+      if (state.phase !== 'playing') return;
       spawnTarget();
       scheduleSpawn(getSpawnInterval(state.secondsLeft));
     }, delay);
   }
 
   function spawnTarget() {
-    const rect = el.board.getBoundingClientRect();
-    const maxX = Math.max(16, rect.width - TARGET_SIZE - 16);
-    const maxY = Math.max(16, rect.height - TARGET_SIZE - 16);
-
+    const rect = ui.board.getBoundingClientRect();
+    const size = rect.width <= 430 ? 78 : TARGET_SIZE;
+    const maxX = Math.max(10, rect.width - size - 10);
+    const maxY = Math.max(10, rect.height - size - 10);
+    const left = Math.random() * maxX + 5;
+    const top = Math.random() * maxY + 5;
     const type = pickTargetType(state.secondsLeft);
+    const meta = targetTypes[type];
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const left = Math.random() * maxX + 8;
-    const top = Math.random() * maxY + 8;
-    const lifetime = getLifetime(state.secondsLeft);
+    const life = getLifetime(state.secondsLeft);
 
-    const btn = document.createElement("button");
-    btn.className = `target ${type}`;
-    btn.style.left = `${left}px`;
-    btn.style.top = `${top}px`;
-    btn.setAttribute("type", "button");
-    btn.innerHTML = `
-      <span class="target-face">
-        <span class="target-emoji">${targetTypes[type].emoji}</span>
-        <span class="target-label">${targetTypes[type].label}</span>
+    const target = document.createElement('button');
+    target.type = 'button';
+    target.className = `target ${type}`;
+    target.style.left = `${left}px`;
+    target.style.top = `${top}px`;
+    target.style.width = `${size}px`;
+    target.style.height = `${size}px`;
+    target.innerHTML = `
+      <span class="face">
+        <span class="emoji">${meta.emoji}</span>
+        <span class="tlabel">${meta.label}</span>
       </span>
     `;
 
-    const handleTap = (e) => {
-      e.preventDefault();
-      hitTarget(id, left + TARGET_SIZE / 2, top + TARGET_SIZE / 2);
+    const activate = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      hitTarget(id, left + size / 2, top + size / 2);
     };
 
-    btn.addEventListener("pointerdown", handleTap, { passive: false });
-    btn.addEventListener("click", (e) => e.preventDefault());
+    target.addEventListener('pointerdown', activate, { passive: false });
+    target.addEventListener('click', activate, { passive: false });
 
-    el.targetsLayer.appendChild(btn);
-    requestAnimationFrame(() => btn.classList.add("show"));
+    ui.targetsLayer.appendChild(target);
+    requestAnimationFrame(() => target.classList.add('show'));
 
     const expireTimer = setTimeout(() => {
-      const target = state.targets.get(id);
-      if (!target || state.phase !== "playing") return;
+      if (!state.targets.has(id) || state.phase !== 'playing') return;
       removeTarget(id);
       state.combo = 0;
-      updateHud();
-    }, lifetime + 20);
+      updateHUD();
+    }, life);
 
-    state.targets.set(id, { id, type, left, top, button: btn, expireTimer });
+    state.targets.set(id, { id, type, el: target, expireTimer });
   }
 
   function removeTarget(id) {
     const target = state.targets.get(id);
     if (!target) return;
     clearTimeout(target.expireTimer);
-    target.button.classList.remove("show");
+    target.el.classList.remove('show');
     setTimeout(() => {
-      target.button.remove();
+      if (target.el && target.el.parentNode) target.el.remove();
     }, 120);
     state.targets.delete(id);
   }
 
   function hitTarget(id, x, y) {
-    if (state.phase !== "playing") return;
+    if (state.phase !== 'playing') return;
     const target = state.targets.get(id);
     if (!target) return;
 
     const meta = targetTypes[target.type];
     removeTarget(id);
 
-    let gained = meta.points;
-    if (target.type === "trap") {
+    let gain = meta.points;
+    if (target.type === 'trap') {
       state.combo = 0;
       state.score = Math.max(0, state.score + meta.points);
     } else {
       state.combo += 1;
-      const mult = getMultiplier(state.combo);
-      gained = meta.points * mult;
-      state.score += gained;
+      gain = meta.points * getMultiplier(state.combo);
+      state.score += gain;
     }
 
-    makeBurst(x, y, meta.emoji, gained);
-    makeParticles(x, y, meta.particle, target.type === "trap" ? 12 : 18);
-    updateHud();
+    spawnPopup(x, y, meta.emoji, gain);
+    spawnParticles(x, y, meta.color, target.type === 'trap' ? 12 : 18);
+    updateHUD();
   }
 
-  function makeBurst(x, y, emoji, value) {
-    const div = document.createElement("div");
-    div.className = `burst-text ${value >= 0 ? "good" : "bad"}`;
-    div.style.left = `${x}px`;
-    div.style.top = `${y}px`;
-    div.innerHTML = `
-      <div class="emoji">${emoji}</div>
-      <div class="value">${value >= 0 ? `+${value}` : value}</div>
+  function spawnPopup(x, y, emoji, value) {
+    const el = document.createElement('div');
+    el.className = `popup ${value >= 0 ? 'good' : 'bad'}`;
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    el.innerHTML = `
+      <div class="pemoji">${emoji}</div>
+      <div class="pvalue">${value >= 0 ? `+${value}` : value}</div>
     `;
-    el.burstsLayer.appendChild(div);
-    setTimeout(() => div.remove(), 720);
+    ui.effectsLayer.appendChild(el);
+    setTimeout(() => el.remove(), 720);
   }
 
-  function makeParticles(x, y, color, count) {
+  function spawnParticles(x, y, color, count) {
     for (let i = 0; i < count; i += 1) {
-      const p = document.createElement("div");
+      const p = document.createElement('div');
       const angle = Math.random() * Math.PI * 2;
-      const distance = 22 + Math.random() * 68;
-      const dx = `${Math.cos(angle) * distance}px`;
-      const dy = `${Math.sin(angle) * distance}px`;
+      const distance = 22 + Math.random() * 66;
+      const size = 8 + Math.random() * 10;
 
-      p.className = "particle";
+      p.className = 'particle';
       p.style.left = `${x}px`;
       p.style.top = `${y}px`;
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
       p.style.background = color;
-      p.style.setProperty("--dx", dx);
-      p.style.setProperty("--dy", dy);
-      p.style.width = `${8 + Math.random() * 12}px`;
-      p.style.height = p.style.width;
-      el.particlesLayer.appendChild(p);
+      p.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+      p.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
 
-      setTimeout(() => p.remove(), 640);
+      ui.effectsLayer.appendChild(p);
+      setTimeout(() => p.remove(), 650);
     }
   }
 
@@ -309,31 +335,36 @@
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "30초 광클 챌린지",
+          title: '30초 광클 챌린지',
           text,
           url: window.location.href,
         });
         return;
       }
-
-      if (navigator.clipboard?.writeText) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(`${text} ${window.location.href}`);
-        alert("공유 문구가 복사됐어.");
+        alert('공유 문구가 복사됐어.');
         return;
       }
-
-      prompt("이 문구를 복사해줘.", `${text} ${window.location.href}`);
+      window.prompt('이 문구를 복사해줘.', `${text} ${window.location.href}`);
     } catch (err) {
-      console.error(err);
+      console.warn(err);
     }
   }
 
-  function bindEvents() {
-    el.startBtn.addEventListener("click", startGame);
-    el.restartBtn.addEventListener("click", startGame);
-    el.shareBtn.addEventListener("click", shareResult);
+  function bind() {
+    ui.startBtn.addEventListener('click', startGame);
+    ui.restartBtn.addEventListener('click', startGame);
+    ui.shareBtn.addEventListener('click', shareResult);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && state.phase === 'playing') {
+        clearTimers();
+      }
+    });
   }
 
-  bindEvents();
-  updateHud();
+  bind();
+  updateHUD();
+  safeInitAds();
 })();
