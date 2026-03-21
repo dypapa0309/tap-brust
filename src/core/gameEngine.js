@@ -228,16 +228,17 @@ export function createGameEngine({ ui, bestScore, onSaveBestScore, onShare, adsC
     const activate = (event) => {
       if (handled) return;
       handled = true;
-      event.preventDefault();
+      if (event.cancelable) {
+        event.preventDefault();
+      }
       event.stopPropagation();
       hitTarget(id, left + size / 2, top + size / 2);
     };
 
-    if (window.PointerEvent) {
-      target.addEventListener('pointerdown', activate, { passive: false });
-    } else {
-      target.addEventListener('click', activate, { passive: false });
-    }
+    target.addEventListener('pointerdown', activate, { passive: false });
+    target.addEventListener('touchstart', activate, { passive: false });
+    target.addEventListener('mousedown', activate, { passive: false });
+    target.addEventListener('click', activate, { passive: false });
 
     ui.targetsLayer.appendChild(target);
     window.requestAnimationFrame(() => target.classList.add('show'));

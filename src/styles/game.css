@@ -534,6 +534,7 @@ h1{
   height:100%;
   display:grid;
   place-items:center;
+  pointer-events:none;
 }
 
 .face-shine{
@@ -548,6 +549,7 @@ h1{
   font-size:2rem;
   filter:drop-shadow(0 3px 8px rgba(0,0,0,.18));
   z-index:1;
+  pointer-events:none;
 }
 
 .tlabel{
@@ -561,6 +563,7 @@ h1{
   padding:4px 8px;
   border-radius:999px;
   background:rgba(0,0,0,.18);
+  pointer-events:none;
 }
 
 .popup{
