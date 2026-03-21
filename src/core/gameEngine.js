@@ -197,6 +197,27 @@ export function createGameEngine({ ui, bestScore, onSaveBestScore, onShare, adsC
     refreshHUD();
   }
 
+  function handleTargetInteraction(event) {
+    const targetEl = event.target.closest('.target');
+    if (!targetEl || !ui.targetsLayer.contains(targetEl)) return;
+
+    const id = targetEl.dataset.targetId;
+    if (!id) return;
+
+    const target = state.targets.get(id);
+    if (!target) return;
+
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+    event.stopPropagation();
+
+    const rect = target.el.getBoundingClientRect();
+    const x = rect.left - ui.board.getBoundingClientRect().left + rect.width / 2;
+    const y = rect.top - ui.board.getBoundingClientRect().top + rect.height / 2;
+    hitTarget(id, x, y);
+  }
+
   function spawnTarget() {
     const rect = ui.board.getBoundingClientRect();
     const size = rect.width <= 430 ? 78 : TARGET_SIZE;
@@ -212,6 +233,7 @@ export function createGameEngine({ ui, bestScore, onSaveBestScore, onShare, adsC
     const target = document.createElement('button');
     target.type = 'button';
     target.className = `target ${type} ${state.skin?.faceClass || ''}`;
+    target.dataset.targetId = id;
     target.style.left = `${left}px`;
     target.style.top = `${top}px`;
     target.style.width = `${size}px`;
@@ -223,22 +245,6 @@ export function createGameEngine({ ui, bestScore, onSaveBestScore, onShare, adsC
         <span class="tlabel">${meta.label}</span>
       </span>
     `;
-
-    let handled = false;
-    const activate = (event) => {
-      if (handled) return;
-      handled = true;
-      if (event.cancelable) {
-        event.preventDefault();
-      }
-      event.stopPropagation();
-      hitTarget(id, left + size / 2, top + size / 2);
-    };
-
-    target.addEventListener('pointerdown', activate, { passive: false });
-    target.addEventListener('touchstart', activate, { passive: false });
-    target.addEventListener('mousedown', activate, { passive: false });
-    target.addEventListener('click', activate, { passive: false });
 
     ui.targetsLayer.appendChild(target);
     window.requestAnimationFrame(() => target.classList.add('show'));
@@ -335,6 +341,10 @@ export function createGameEngine({ ui, bestScore, onSaveBestScore, onShare, adsC
     ui.resumeBtn.addEventListener('click', resumeGame);
     ui.restartBtn.addEventListener('click', startGame);
     ui.shareBtn.addEventListener('click', () => onShare(state.score, makeComment(state.score)));
+    ui.targetsLayer.addEventListener('pointerdown', handleTargetInteraction, { passive: false });
+    ui.targetsLayer.addEventListener('touchstart', handleTargetInteraction, { passive: false });
+    ui.targetsLayer.addEventListener('mousedown', handleTargetInteraction, { passive: false });
+    ui.targetsLayer.addEventListener('click', handleTargetInteraction, { passive: false });
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && state.phase === 'playing') {
