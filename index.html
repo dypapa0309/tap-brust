@@ -5,16 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>30초 광클 챌린지</title>
   <meta name="description" content="터치와 클릭으로 즐기는 30초 광클 미니게임" />
+  <meta name="theme-color" content="#11131a" />
 
   <!--
-    아래 ca-pub / slot 번호만 네 값으로 바꿔.
-    로컬(file://)에서는 광고가 안 뜨는 게 정상.
+    웹 미리보기용 광고 스크립트.
+    앱 배포 시에는 AdSense 대신 AdMob 같은 앱 전용 SDK로 바꾸는 편이 맞다.
   -->
   <script async
     src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXX"
     crossorigin="anonymous"></script>
-
-  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="app">
@@ -28,6 +27,17 @@
         <strong id="bestScore">0점</strong>
       </div>
     </header>
+
+    <section class="meta-strip">
+      <div class="card meta-card">
+        <span class="meta-label">코인</span>
+        <strong id="coinValue">0</strong>
+      </div>
+      <div class="card meta-card">
+        <span class="meta-label">오늘 미션</span>
+        <strong id="missionProgressText">0 / 3</strong>
+      </div>
+    </section>
 
     <section class="ad-wrap card">
       <div class="ad-title">상단 광고 영역</div>
@@ -65,21 +75,56 @@
       <div class="board-bg"></div>
 
       <div id="readyOverlay" class="overlay show">
-        <div class="panel">
+        <div class="panel home-panel">
           <p class="eyebrow">손가락 속도 테스트</p>
-          <h2>30초 안에 얼마나 터뜨릴 수 있을까?</h2>
-          <p class="desc">
-            귀여운 타겟이 계속 튀어나와. 빠르게 눌러서 점수를 올리고,
-            보너스는 챙기고, 폭탄은 조심해.
+          <h2>오늘은 어떤 모드로 달릴까?</h2>
+          <p id="homeModeDesc" class="desc">
+            클래식은 가장 정석적인 30초 광클 모드다.
           </p>
 
-          <div class="phase-row">
-            <div>초반 적응</div>
-            <div>중반 몰입</div>
-            <div>후반 광기</div>
+          <div id="modeList" class="mode-list">
+            <button class="mode-card active" type="button" data-mode="classic">
+              <span class="mode-name">클래식</span>
+              <span class="mode-copy">30초 표준 룰</span>
+            </button>
+            <button class="mode-card" type="button" data-mode="survival">
+              <span class="mode-name">서바이벌</span>
+              <span class="mode-copy">실수하면 시간이 줄어든다</span>
+            </button>
+            <button class="mode-card" type="button" data-mode="fever">
+              <span class="mode-name">피버</span>
+              <span class="mode-copy">보너스가 더 자주 나온다</span>
+            </button>
           </div>
 
-          <button id="startBtn" class="btn btn-primary" type="button">시작하기</button>
+          <section class="mission-card">
+            <div class="mission-head">
+              <p class="eyebrow">Daily Missions</p>
+              <strong id="missionSummary">0 / 3 완료</strong>
+            </div>
+            <div id="missionList" class="mission-list"></div>
+          </section>
+
+          <section class="shop-card">
+            <div class="mission-head">
+              <p class="eyebrow">Skin Shop</p>
+              <strong>코인으로 테마 해금</strong>
+            </div>
+            <div id="skinList" class="skin-list"></div>
+          </section>
+
+          <button id="startBtn" class="btn btn-primary" type="button">도전 시작</button>
+        </div>
+      </div>
+
+      <div id="pauseOverlay" class="overlay hidden">
+        <div class="panel">
+          <p class="eyebrow">일시정지</p>
+          <h2 id="pauseTitle">잠깐 멈췄어</h2>
+          <p id="pauseDesc" class="desc">
+            준비되면 이어서 다시 시작하면 된다.
+          </p>
+          <button id="resumeBtn" class="btn btn-primary" type="button">이어하기</button>
         </div>
       </div>
 
@@ -98,6 +143,7 @@
 
           <div class="result-box">
             <p>최고 기록: <strong id="resultBest">0점</strong></p>
+            <p id="rewardLine">이번 라운드 보상: +0 코인</p>
             <p>콤보 10회부터 x2, 18회부터 x3 배수.</p>
           </div>
 
@@ -134,6 +180,6 @@
     </footer>
   </div>
 
-  <script src="./app.js"></script>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

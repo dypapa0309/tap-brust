@@ -1,51 +1,58 @@
-# 30초 광클 챌린지 - HTML/CSS/JS 배포형
+# Tap Burst
 
-## 파일 구성
-- `index.html`
-- `style.css`
-- `app.js`
+`Vite + Capacitor` 기준으로 앱 배포를 준비한 구조다. 웹에서 먼저 개발하고 `dist`를 네이티브 셸로 감싸는 방식이다.
 
-## 실행 방법
-### 1) 로컬에서 바로 보기
-파일 압축 해제 후 `index.html` 더블클릭
+## 구조
+- `index.html`: Vite 엔트리 HTML
+- `src/main.js`: 앱 부트스트랩
+- `src/core/`: 게임 상태, 점수, 스폰 흐름
+- `src/ui/`: DOM 참조, HUD, 오버레이, 이펙트
+- `src/platform/`: 저장소, 공유, 광고 초기화 같은 플랫폼 의존 코드
+- `src/styles/`: 기본 스타일과 게임 스타일
+- `resources/`: 앱 아이콘/스플래시 원본 SVG
+- `capacitor.config.json`: 앱 셸 설정
+- `.env.example`: 앱 이름, 패키지명, AdMob 예시 값
 
-### 2) GitHub Pages / Netlify / Vercel 정적 배포
-압축 해제 후 파일 3개를 그대로 업로드하면 됨.
+## 실행
+1. `npm install`
+2. `npm run dev`
+3. 앱 빌드 시 `npm run build`
 
-## 광고 넣는 위치
-현재 광고 자리 UI가 들어간 곳:
-- 상단 광고: `.ad-slot-top`
-- 결과창 광고: `.ad-slot-result`
-- 하단 광고: `.ad-slot-bottom`
+## Capacitor 연결
+1. `npx cap add android`
+2. macOS에서 iOS도 쓸 경우 `npx cap add ios`
+3. 웹 번들 반영은 `npm run build`
+4. 네이티브 프로젝트 동기화는 `npm run cap:sync`
+5. Android Studio는 `npm run cap:android`
+6. Xcode는 `npm run cap:ios`
 
-여기에 애드센스 코드로 교체하면 됨.
+## 앱 설정 바꾸는 곳
+1. `.env.example`를 복사해 `.env` 생성
+2. 앱 이름/패키지명/광고 ID는 `.env` 기준으로 관리
+3. Android AdMob App ID는 `android/app/src/main/res/values/strings.xml`
+4. Android 메타데이터는 `android/app/src/main/AndroidManifest.xml`
+5. 아이콘과 스플래시는 `resources/`
 
-## 애드센스 예시
-`index.html`의 광고 슬롯 내부를 이런 식으로 바꾸면 됨.
+## 아이콘/스플래시 생성
+1. `npm install`
+2. `cp .env.example .env`
+3. `npm run assets:android`
+4. iOS는 CocoaPods 설치 후 `npm run assets:ios`
 
-```html
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-xxxxxxxxxx"
-     data-ad-slot="1234567890"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-  (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-```
+## 릴리스 가이드
+- Android 배포 순서는 `RELEASE.md` 참고
 
-그리고 `</head>` 위에 애드센스 스크립트 추가:
+## 앱 전환 시 주의점
+- 웹은 AdSense 슬롯, 네이티브는 AdMob 플러그인을 쓰도록 분리했다.
+- 앱 저장은 Capacitor Preferences를 사용하고, 웹은 localStorage로 폴백한다.
+- 앱 공유는 Capacitor Share를 사용하고, 웹은 Web Share/클립보드로 폴백한다.
+- 앱에선 Haptics로 눌림 피드백이 들어간다.
+- 실제 배포 전에는 `.env`와 Android `strings.xml`의 테스트 광고 ID를 실광고 ID로 바꿔야 한다.
+- iOS는 CocoaPods가 설치돼야 `npx cap add ios`가 동작한다.
 
-```html
-<script async
-  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxx"
-  crossorigin="anonymous"></script>
-```
-
-## 특징
+## 현재 특징
 - 모바일 터치 / PC 클릭 지원
-- 최고기록 localStorage 저장
+- 최고기록 저장
 - 보너스 / 함정 / 콤보 배수
-- 팡팡 파티클 이펙트
-- 바로 배포 가능한 정적 구조
+- 팡팡 파티클과 콤보 이펙트
+- 화면 전환 시 자동 일시정지 후 이어하기

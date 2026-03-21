@@ -1,0 +1,6 @@
+{
+  "appId": "com.tapburst.game",
+  "appName": "Tap Burst",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

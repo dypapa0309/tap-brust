@@ -1,0 +1,14 @@
+<svg width="2732" height="2732" viewBox="0 0 2732 2732" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="2732" height="2732" fill="#08090D"/>
+  <circle cx="1366" cy="1200" r="560" fill="#67D0FF" fill-opacity="0.16"/>
+  <circle cx="1366" cy="1530" r="380" fill="#FF6888" fill-opacity="0.18"/>
+  <circle cx="1366" cy="1366" r="312" fill="url(#paint0_linear)"/>
+  <path d="M1384 862L1432.53 1011.38H1589.57L1462.52 1103.72L1511.05 1253.1L1384 1160.76L1256.95 1253.1L1305.48 1103.72L1178.43 1011.38H1335.47L1384 862Z" fill="#FFC859"/>
+  <text x="1366" y="1870" text-anchor="middle" fill="white" font-size="188" font-family="Arial, sans-serif" font-weight="700">Tap Burst</text>
+  <defs>
+    <linearGradient id="paint0_linear" x1="1366" y1="1054" x2="1366" y2="1678" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7FDCFF"/>
+      <stop offset="1" stop-color="#33B6FF"/>
+    </linearGradient>
+  </defs>
+</svg>

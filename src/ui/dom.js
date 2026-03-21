@@ -1,0 +1,37 @@
+export function getUI() {
+  const $ = (id) => document.getElementById(id);
+
+  return {
+    board: $('board'),
+    coinValue: $('coinValue'),
+    missionProgressText: $('missionProgressText'),
+    targetsLayer: $('targetsLayer'),
+    effectsLayer: $('effectsLayer'),
+    readyOverlay: $('readyOverlay'),
+    pauseOverlay: $('pauseOverlay'),
+    resultOverlay: $('resultOverlay'),
+    startBtn: $('startBtn'),
+    resumeBtn: $('resumeBtn'),
+    restartBtn: $('restartBtn'),
+    shareBtn: $('shareBtn'),
+    modeList: $('modeList'),
+    homeModeDesc: $('homeModeDesc'),
+    missionList: $('missionList'),
+    missionSummary: $('missionSummary'),
+    skinList: $('skinList'),
+    bestScore: $('bestScore'),
+    timeValue: $('timeValue'),
+    scoreValue: $('scoreValue'),
+    comboValue: $('comboValue'),
+    comboSub: $('comboSub'),
+    warningBar: $('warningBar'),
+    warningSec: $('warningSec'),
+    resultScore: $('resultScore'),
+    resultRank: $('resultRank'),
+    resultComment: $('resultComment'),
+    resultBest: $('resultBest'),
+    rewardLine: $('rewardLine'),
+    pauseTitle: $('pauseTitle'),
+    pauseDesc: $('pauseDesc'),
+  };
+}
